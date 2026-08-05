@@ -572,7 +572,7 @@ h2.title{font-family:"Anuphan",sans-serif;font-size:23px;font-weight:600;margin:
               <span><i style="background:#19D3BE"></i>ที่ผ่านมา</span>
               <span><i style="background:#F0654F"></i>ถ้าไม่เปลี่ยนพฤติกรรม</span>
             </div>
-            <div class="callout">ถ้าคุณยังมีพฤติกรรมการนอนและการกินแบบเดือนนี้ อีก 6 เดือนข้างหน้า คะแนน Steady Score จะลดลงเหลือ <b>65</b></div>
+            <div class="callout" id="trendNote">ถ้าคุณยังมีพฤติกรรมการนอนและการกินแบบเดือนนี้ อีก 6 เดือนข้างหน้า คะแนน Steady Score จะลดลงเหลือ <b>65</b></div>
           </div>
 
           <div class="card">
@@ -951,10 +951,10 @@ h2.title{font-family:"Anuphan",sans-serif;font-size:23px;font-weight:600;margin:
   /* chart */
   var DATA = {
     m: { past:[64,66,63,69,71,72], labels:["ก.พ.","มี.ค.","เม.ย.","พ.ค.","มิ.ย.","ก.ค."], proj:[72,70,69,67,66,65], projLabels:["ส.ค.","ก.ย.","ต.ค.","พ.ย.","ธ.ค.","ม.ค."] },
-    y: { past:[52,58,61,66,72], labels:["2564","2565","2566","2567","2568"], proj:[72,68,65], projLabels:["2569","2570","2571"] }
+    y: { past:[52,58,61,66,72], labels:["2564","2565","2566","2567","2568"], proj:[72,65,55], projLabels:["2569","2570","2571"] }
   };
   function drawChart(range){
-    var d = DATA[range], W = 320, H = 170, padL = 26, padR = 8, padT = 14, padB = 22;
+    var d = DATA[range], W = 320, H = 170, padL = 30, padR = 24, padT = 14, padB = 22;
     var n = d.past.concat(d.proj.slice(1)).length;
     var min = 45, max = 90;
     var x = function(i){ return padL + i * (W - padL - padR) / (n - 1); };
@@ -975,6 +975,9 @@ h2.title{font-family:"Anuphan",sans-serif;font-size:23px;font-weight:600;margin:
     d.labels.forEach(function(l,i){ svg += '<text class="lbl" x="' + x(i) + '" y="' + (H-6) + '" text-anchor="middle">' + l + '</text>'; });
     svg += '<text class="lbl" x="' + x(n-1) + '" y="' + (H-6) + '" text-anchor="middle">' + d.projLabels[d.projLabels.length-1] + '</text>';
     $("#chart").innerHTML = svg;
+    $("#trendNote").innerHTML = range === "y"
+      ? 'ถ้าคุณยังมีพฤติกรรมการนอนและการกินแบบนี้ อีก 3 ปีข้างหน้า คะแนน Steady Score จะลดลงเหลือ <b>55</b>'
+      : 'ถ้าคุณยังมีพฤติกรรมการนอนและการกินแบบเดือนนี้ อีก 6 เดือนข้างหน้า คะแนน Steady Score จะลดลงเหลือ <b>65</b>';
   }
   drawChart("m");
   $("#s-trend .chips").addEventListener("click", function(e){
