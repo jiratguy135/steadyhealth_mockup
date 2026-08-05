@@ -1,0 +1,856 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SteadyHealth — Prototype</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anuphan:wght@400;500;600;700&family=IBM+Plex+Sans+Thai:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#08152B;
+  --ink-2:#0E2244;
+  --line:rgba(148,178,232,.16);
+  --pulse:#19D3BE;
+  --iris:#7C8CF3;
+  --lav:#A9B6F7;
+  --text:#EAF0FF;
+  --muted:#93A6CC;
+  --good:#3FD39A;
+  --warn:#F5B342;
+  --bad:#F0654F;
+  --radius:20px;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0}
+body{
+  font-family:"IBM Plex Sans Thai","Anuphan",system-ui,sans-serif;
+  background:
+    radial-gradient(900px 600px at 15% 10%, #A8B4F2 0%, transparent 60%),
+    radial-gradient(800px 700px at 85% 85%, #8FC7E8 0%, transparent 55%),
+    linear-gradient(150deg,#8C9BEC 0%,#7E93E4 40%,#9BB4E8 100%);
+  min-height:100vh;
+  display:flex;align-items:center;justify-content:center;
+  padding:28px 16px;color:var(--text);
+}
+@media (max-width:760px){ body{padding:0} }
+
+/* ---------- stage ---------- */
+.stage{display:flex;gap:44px;align-items:center;justify-content:center;flex-wrap:wrap-reverse;max-width:1060px;width:100%}
+.brief{max-width:300px;color:#0B1A33}
+.brief .mark{display:flex;align-items:center;gap:8px;margin-bottom:18px}
+.brief .mark svg{width:34px;height:22px}
+.brief .mark span{font-family:"Anuphan",sans-serif;font-weight:700;font-size:20px;letter-spacing:-.2px}
+.brief .mark span i{font-style:normal;font-weight:400;opacity:.75}
+.brief h1{font-family:"Anuphan",sans-serif;font-size:26px;line-height:1.35;margin:0 0 12px;font-weight:600}
+.brief p{font-size:13.5px;line-height:1.7;color:rgba(11,26,51,.72);margin:0 0 18px}
+.brief ul{margin:0;padding:0;list-style:none;font-size:12.5px;color:rgba(11,26,51,.7)}
+.brief li{padding:7px 0;border-top:1px solid rgba(11,26,51,.14);display:flex;gap:8px}
+.brief li b{font-family:"IBM Plex Mono",monospace;font-weight:500;font-size:11px;color:rgba(11,26,51,.5);min-width:26px}
+@media (max-width:760px){ .brief{display:none} }
+
+/* ---------- phone ---------- */
+.phone{
+  width:392px;height:812px;flex:none;border-radius:46px;padding:11px;
+  background:linear-gradient(160deg,#1B2F55,#0A1730 60%);
+  box-shadow:0 44px 90px -30px rgba(5,17,40,.65), 0 0 0 1px rgba(255,255,255,.14) inset;
+  position:relative;
+}
+@media (max-width:760px){
+  .phone{width:100%;height:100vh;height:100dvh;border-radius:0;padding:0;box-shadow:none}
+}
+.screenbox{
+  position:relative;width:100%;height:100%;border-radius:36px;overflow:hidden;
+  background:linear-gradient(180deg,#0A1832 0%,#08142A 55%,#0A1A34 100%);
+  display:flex;flex-direction:column;
+}
+@media (max-width:760px){ .screenbox{border-radius:0} }
+.screenbox::before{
+  content:"";position:absolute;inset:0;pointer-events:none;
+  background:radial-gradient(420px 260px at 70% -6%, rgba(124,140,243,.32), transparent 65%),
+             radial-gradient(300px 220px at 0% 100%, rgba(25,211,190,.14), transparent 70%);
+}
+.statusbar{
+  position:relative;z-index:2;display:flex;justify-content:space-between;align-items:center;
+  padding:14px 24px 4px;font-family:"IBM Plex Mono",monospace;font-size:11px;color:rgba(234,240,255,.6);
+}
+.statusbar .dots{display:flex;gap:4px;align-items:center}
+.statusbar .dots i{width:5px;height:5px;border-radius:50%;background:rgba(234,240,255,.45);display:block}
+
+/* ---------- scroll area + screens ---------- */
+.viewport{position:relative;z-index:2;flex:1;overflow-y:auto;overflow-x:hidden;scrollbar-width:none}
+.viewport::-webkit-scrollbar{display:none}
+.screen{display:none;padding:6px 20px 34px;animation:rise .32s ease both}
+.screen.is-active{display:block}
+@keyframes rise{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){*{animation-duration:.01ms !important;transition-duration:.01ms !important}}
+
+.eyebrow{font-family:"IBM Plex Mono",monospace;font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--pulse);margin:0 0 4px}
+h2.title{font-family:"Anuphan",sans-serif;font-size:23px;font-weight:600;margin:0 0 14px;letter-spacing:-.2px}
+.sub{font-size:12.5px;color:var(--muted);line-height:1.6;margin:0 0 16px}
+
+.card{
+  background:linear-gradient(165deg,rgba(255,255,255,.085),rgba(255,255,255,.035));
+  border:1px solid var(--line);border-radius:var(--radius);padding:16px;margin-bottom:14px;
+  backdrop-filter:blur(6px);
+}
+.card h3{font-family:"Anuphan",sans-serif;font-size:15px;margin:0 0 10px;font-weight:600}
+.card .lead{font-size:12.5px;color:var(--muted);line-height:1.65;margin:0}
+
+/* ---------- ECG score (signature) ---------- */
+.score-card{padding:18px 16px 14px;position:relative;overflow:hidden}
+.score-card .glow{position:absolute;inset:-40% -10% auto;height:200px;background:radial-gradient(closest-side,rgba(25,211,190,.22),transparent);pointer-events:none}
+.score-top{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;position:relative}
+.score-num{font-family:"IBM Plex Mono",monospace;font-size:54px;line-height:.9;font-weight:500;letter-spacing:-2px}
+.score-num small{font-size:15px;color:var(--muted);letter-spacing:0}
+.score-label{text-align:right}
+.score-label .tag{
+  display:inline-block;font-size:11px;padding:4px 10px;border-radius:999px;
+  background:rgba(63,211,154,.14);color:var(--good);border:1px solid rgba(63,211,154,.3);
+  font-weight:500;
+}
+.score-label p{margin:6px 0 0;font-size:11px;color:var(--muted)}
+.ecg{width:100%;height:96px;display:block;margin-top:6px}
+.ecg path.trace{fill:none;stroke:var(--pulse);stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round;filter:drop-shadow(0 0 6px rgba(25,211,190,.55))}
+.ecg path.ghost{fill:none;stroke:rgba(148,178,232,.13);stroke-width:1.6}
+.score-foot{display:flex;gap:8px;margin-top:2px;font-size:10.5px;color:var(--muted);font-family:"IBM Plex Mono",monospace}
+.score-foot span{flex:1;padding-top:8px;border-top:1px solid var(--line)}
+.score-foot b{display:block;color:var(--text);font-size:13px;font-weight:500;margin-top:2px}
+
+.pop{position:absolute;right:22px;top:52px;font-family:"IBM Plex Mono",monospace;font-size:13px;color:var(--pulse);opacity:0;pointer-events:none}
+.pop.go{animation:pop 1.1s ease forwards}
+@keyframes pop{0%{opacity:0;transform:translateY(4px)}25%{opacity:1}100%{opacity:0;transform:translateY(-22px)}}
+
+/* ---------- checklist ---------- */
+.check{display:flex;gap:12px;align-items:flex-start;padding:11px 0;border-top:1px solid var(--line);cursor:pointer}
+.check:first-of-type{border-top:none}
+.box{
+  width:21px;height:21px;flex:none;border-radius:7px;border:1.5px solid rgba(148,178,232,.4);
+  display:grid;place-items:center;transition:.22s;margin-top:1px;
+}
+.box svg{width:11px;height:11px;opacity:0;transform:scale(.5);transition:.22s}
+.check.done .box{background:var(--pulse);border-color:var(--pulse)}
+.check.done .box svg{opacity:1;transform:none}
+.check .txt{font-size:13.5px;line-height:1.45}
+.check .txt em{display:block;font-style:normal;font-size:11.5px;color:var(--muted);margin-top:2px}
+.check.done .txt{color:var(--muted);text-decoration:line-through;text-decoration-color:rgba(147,166,204,.5)}
+.check .pts{margin-left:auto;font-family:"IBM Plex Mono",monospace;font-size:11px;color:var(--pulse);opacity:.8}
+.check.done .pts{opacity:.3}
+
+/* ---------- plan chips ---------- */
+.plan{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin-bottom:14px}
+.tile{background:rgba(255,255,255,.06);border:1px solid var(--line);border-radius:16px;padding:12px 10px;text-align:center}
+.tile .k{font-family:"IBM Plex Mono",monospace;font-size:17px;font-weight:500}
+.tile .u{font-size:10px;color:var(--muted);margin-top:3px;line-height:1.3}
+.tile .n{font-size:10.5px;color:var(--pulse);margin-bottom:6px;letter-spacing:.04em}
+
+.row{display:flex;gap:10px;align-items:center;padding:10px 0;border-top:1px solid var(--line);font-size:13px}
+.row:first-child{border-top:none}
+.row .ic{width:30px;height:30px;border-radius:10px;flex:none;display:grid;place-items:center;background:rgba(124,140,243,.18);font-size:14px}
+.row .meta{font-size:11px;color:var(--muted);margin-top:2px}
+.row .right{margin-left:auto;font-family:"IBM Plex Mono",monospace;font-size:11px;color:var(--muted)}
+
+/* ---------- buttons ---------- */
+.btn{
+  width:100%;border:none;border-radius:14px;padding:13px;font-size:14px;font-weight:600;
+  font-family:"Anuphan",sans-serif;cursor:pointer;transition:.2s;
+  background:linear-gradient(100deg,var(--pulse),#3FA9F5);color:#05172C;
+}
+.btn:hover{filter:brightness(1.08)}
+.btn:active{transform:scale(.985)}
+.btn.ghost{background:transparent;border:1px solid rgba(148,178,232,.35);color:var(--text)}
+.btn:focus-visible,.check:focus-visible,.tab:focus-visible,.chip:focus-visible{outline:2px solid var(--pulse);outline-offset:2px}
+
+.chip{
+  border:1px solid rgba(148,178,232,.3);background:rgba(255,255,255,.05);color:var(--text);
+  border-radius:999px;padding:8px 13px;font-size:12px;cursor:pointer;font-family:inherit;transition:.18s;
+}
+.chip:hover{border-color:var(--pulse)}
+.chip.on{background:var(--pulse);color:#05172C;border-color:var(--pulse);font-weight:600}
+.chips{display:flex;flex-wrap:wrap;gap:7px}
+
+/* ---------- labs ---------- */
+.lab{padding:12px 0;border-top:1px solid var(--line)}
+.lab:first-child{border-top:none}
+.lab .head{display:flex;justify-content:space-between;align-items:baseline;font-size:13px}
+.lab .val{font-family:"IBM Plex Mono",monospace;font-size:13px}
+.rail{height:7px;border-radius:99px;margin-top:9px;position:relative;background:linear-gradient(90deg,var(--warn),var(--good) 32%,var(--good) 68%,var(--bad))}
+.rail .pin{position:absolute;top:-4px;width:15px;height:15px;border-radius:50%;background:#fff;border:3px solid #08152B;transform:translateX(-50%);transition:left .8s cubic-bezier(.2,.8,.2,1)}
+.lab .note{font-size:11px;color:var(--muted);margin-top:7px;line-height:1.55}
+.lab .status{font-size:11px;font-weight:600}
+.s-good{color:var(--good)} .s-warn{color:var(--warn)} .s-bad{color:var(--bad)}
+
+.drop{
+  border:1.5px dashed rgba(148,178,232,.35);border-radius:var(--radius);padding:26px 18px;text-align:center;
+  cursor:pointer;transition:.2s;margin-bottom:14px;
+}
+.drop:hover{border-color:var(--pulse);background:rgba(25,211,190,.05)}
+.drop .big{font-size:26px;margin-bottom:8px}
+.drop p{margin:0;font-size:12.5px;color:var(--muted);line-height:1.6}
+.drop b{display:block;font-size:14px;color:var(--text);margin-bottom:4px;font-family:"Anuphan",sans-serif}
+.spin{width:26px;height:26px;border-radius:50%;border:2.5px solid rgba(148,178,232,.25);border-top-color:var(--pulse);margin:0 auto 10px;animation:sp .8s linear infinite}
+@keyframes sp{to{transform:rotate(360deg)}}
+
+/* ---------- chart ---------- */
+.chart{width:100%;height:170px;display:block}
+.chart .grid{stroke:rgba(148,178,232,.14);stroke-width:1}
+.chart .lineA{fill:none;stroke:var(--pulse);stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}
+.chart .lineB{fill:none;stroke:var(--bad);stroke-width:2.2;stroke-dasharray:5 5;stroke-linecap:round}
+.chart .dot{fill:#08152B;stroke:var(--pulse);stroke-width:2.2}
+.chart .lbl{font-family:"IBM Plex Mono",monospace;font-size:9px;fill:var(--muted)}
+.legend{display:flex;gap:14px;font-size:11px;color:var(--muted);margin-top:8px}
+.legend i{width:14px;height:2px;display:inline-block;vertical-align:middle;margin-right:5px}
+
+.callout{border-left:2px solid var(--warn);padding:2px 0 2px 12px;font-size:12.5px;line-height:1.65;color:#F6E2BE;margin-top:12px}
+
+/* ---------- monthly ---------- */
+.delta{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+.delta div{background:rgba(255,255,255,.05);border:1px solid var(--line);border-radius:14px;padding:11px}
+.delta .l{font-size:11px;color:var(--muted)}
+.delta .v{font-family:"IBM Plex Mono",monospace;font-size:16px;margin-top:3px}
+.delta .d{font-size:11px;margin-top:2px}
+.supp{display:flex;gap:11px;align-items:center;padding:11px 0;border-top:1px solid var(--line)}
+.supp:first-of-type{border-top:none}
+.supp .pill{width:34px;height:34px;border-radius:12px;display:grid;place-items:center;font-family:"IBM Plex Mono",monospace;font-size:12px;font-weight:600;color:#05172C;flex:none}
+.supp .nm{font-size:13.5px}
+.supp .rs{font-size:11px;color:var(--muted);margin-top:2px;line-height:1.45}
+.ship{background:linear-gradient(120deg,rgba(25,211,190,.16),rgba(124,140,243,.16));border:1px solid rgba(25,211,190,.3)}
+.ship .price{font-family:"IBM Plex Mono",monospace;font-size:20px}
+.ship .strike{color:var(--muted);text-decoration:line-through;font-size:13px;margin-left:7px}
+
+/* ---------- chat ---------- */
+.chatwrap{display:flex;flex-direction:column;gap:10px;padding-bottom:6px}
+.msg{max-width:82%;padding:11px 14px;border-radius:16px;font-size:13px;line-height:1.6;animation:rise .28s ease both}
+.msg.bot{background:rgba(255,255,255,.07);border:1px solid var(--line);border-bottom-left-radius:5px;align-self:flex-start}
+.msg.me{background:linear-gradient(100deg,var(--pulse),#3FA9F5);color:#05172C;border-bottom-right-radius:5px;align-self:flex-end;font-weight:500}
+.typing{display:flex;gap:4px;align-items:center}
+.typing i{width:6px;height:6px;border-radius:50%;background:var(--muted);animation:bl 1.1s infinite}
+.typing i:nth-child(2){animation-delay:.15s} .typing i:nth-child(3){animation-delay:.3s}
+@keyframes bl{0%,60%,100%{opacity:.25;transform:translateY(0)}30%{opacity:1;transform:translateY(-3px)}}
+.composer{display:flex;gap:8px;margin-top:12px}
+.composer input{
+  flex:1;background:rgba(255,255,255,.06);border:1px solid var(--line);border-radius:14px;
+  padding:12px 14px;color:var(--text);font-family:inherit;font-size:13px;
+}
+.composer input:focus{outline:none;border-color:var(--pulse)}
+.composer button{width:46px;flex:none;border-radius:14px;border:none;background:var(--pulse);color:#05172C;font-size:16px;cursor:pointer}
+
+/* ---------- onboarding ---------- */
+.ob{position:absolute;inset:0;z-index:6;background:linear-gradient(180deg,#0A1832,#08142A);display:flex;flex-direction:column;padding:34px 26px 26px;overflow-y:auto}
+.ob.hide{display:none}
+.ob .logo{display:flex;align-items:center;gap:8px;margin-bottom:auto}
+.ob .logo svg{width:36px;height:24px}
+.ob .logo b{font-family:"Anuphan",sans-serif;font-size:19px;font-weight:700}
+.ob .logo b i{font-style:normal;font-weight:400;opacity:.7}
+.ob h1{font-family:"Anuphan",sans-serif;font-size:27px;line-height:1.35;font-weight:600;margin:0 0 10px}
+.ob p.k{font-size:13px;color:var(--muted);line-height:1.7;margin:0 0 20px}
+.ob .step{font-family:"IBM Plex Mono",monospace;font-size:10.5px;color:var(--pulse);letter-spacing:.16em;margin-bottom:8px}
+.ob-body{margin-top:22px}
+.field{margin-bottom:14px}
+.field label{display:block;font-size:11.5px;color:var(--muted);margin-bottom:7px}
+.field input{width:100%;background:rgba(255,255,255,.06);border:1px solid var(--line);border-radius:13px;padding:12px 14px;color:var(--text);font-family:"IBM Plex Mono",monospace;font-size:14px}
+.field input:focus{outline:none;border-color:var(--pulse)}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.consent{display:flex;gap:12px;align-items:flex-start;background:rgba(255,255,255,.05);border:1px solid var(--line);border-radius:16px;padding:14px;margin:16px 0;cursor:pointer}
+.switch{width:42px;height:24px;border-radius:99px;background:rgba(148,178,232,.25);position:relative;flex:none;transition:.24s;margin-top:2px}
+.switch::after{content:"";position:absolute;top:3px;left:3px;width:18px;height:18px;border-radius:50%;background:#fff;transition:.24s}
+.consent.on .switch{background:var(--pulse)}
+.consent.on .switch::after{left:21px}
+.consent .c-t{font-size:13px;line-height:1.5}
+.consent .c-s{font-size:11px;color:var(--muted);margin-top:4px;line-height:1.5}
+.ob .skip{background:none;border:none;color:var(--muted);font-size:12px;font-family:inherit;cursor:pointer;padding:14px 0 0;width:100%}
+.ob-foot{margin-top:auto;padding-top:20px}
+
+/* ---------- tabbar ---------- */
+.tabbar{
+  position:relative;z-index:3;display:flex;padding:9px 10px calc(11px + env(safe-area-inset-bottom));
+  background:rgba(6,17,36,.82);backdrop-filter:blur(14px);border-top:1px solid var(--line);
+}
+.tab{flex:1;background:none;border:none;color:var(--muted);font-family:inherit;font-size:10px;cursor:pointer;padding:5px 0;display:grid;justify-items:center;gap:4px;transition:.2s}
+.tab svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.tab.on{color:var(--pulse)}
+.tab .badge{position:absolute;transform:translate(11px,-4px);width:6px;height:6px;border-radius:50%;background:var(--bad)}
+
+/* ---------- toast ---------- */
+.toast{
+  position:absolute;left:50%;bottom:88px;transform:translate(-50%,14px);z-index:9;
+  background:rgba(9,24,48,.95);border:1px solid rgba(25,211,190,.4);border-radius:14px;
+  padding:11px 16px;font-size:12.5px;opacity:0;pointer-events:none;transition:.3s;white-space:nowrap;
+  box-shadow:0 12px 30px -10px rgba(0,0,0,.6);
+}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+</style>
+</head>
+<body>
+
+<div class="stage">
+  <aside class="brief">
+    <div class="mark">
+      <svg viewBox="0 0 60 34"><path d="M2 20h7l4-13 5 24 5-17 4 6h6" fill="none" stroke="#0B1A33" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M46 9c-6-3-12 0-11 4s10 3 10 7-6 6-12 3" fill="none" stroke="#0B1A33" stroke-width="2.6" stroke-linecap="round"/></svg>
+      <span>Steady<i>Health</i></span>
+    </div>
+    <h1>ต้นแบบแอปที่กดเล่นได้จริง</h1>
+    <p>เป็น prototype แบบ clickable ครบทุกฟีเจอร์ในเด็ค ตั้งแต่เชื่อม Wearable Kit จนถึงสรุปรายเดือนและสั่งวิตามิน ข้อมูลทั้งหมดเป็นตัวอย่างจำลอง</p>
+    <ul>
+      <li><b>01</b><span>ตั้งค่าเริ่มต้น + ขอความยินยอมก่อนซิงก์ข้อมูล</span></li>
+      <li><b>02</b><span>Steady Score เต้นตามเช็กลิสต์ที่กดจริง</span></li>
+      <li><b>03</b><span>อัปโหลดผลตรวจแล้วแปลค่าเป็นกราฟสี</span></li>
+      <li><b>04</b><span>กราฟแนวโน้ม + คาดการณ์ 6 เดือนข้างหน้า</span></li>
+      <li><b>05</b><span>สรุปเดือน วิตามินที่แนะนำ และแผนจัดส่ง</span></li>
+    </ul>
+  </aside>
+
+  <div class="phone">
+    <div class="screenbox">
+
+      <!-- ============ ONBOARDING ============ -->
+      <div class="ob" id="ob">
+        <div class="logo">
+          <svg viewBox="0 0 60 34"><path d="M2 20h7l4-13 5 24 5-17 4 6h6" fill="none" stroke="#19D3BE" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M46 9c-6-3-12 0-11 4s10 3 10 7-6 6-12 3" fill="none" stroke="#EAF0FF" stroke-width="2.6" stroke-linecap="round"/></svg>
+          <b>Steady<i>Health</i></b>
+        </div>
+
+        <div id="ob1">
+          <div class="ob-body">
+            <div class="step">ขั้นที่ 1 จาก 2</div>
+            <h1>เชื่อมต่อ<br>Wearable Kit</h1>
+            <p class="k">เราจะอ่านข้อมูลจากนาฬิกาของคุณเพื่อดูการนอน อัตราการเต้นหัวใจ ก้าวเดิน ความเครียด และกิจกรรมที่ทำ — ต่อเมื่อคุณอนุญาตเท่านั้น</p>
+            <div class="consent" id="consent" role="button" tabindex="0">
+              <div class="switch"></div>
+              <div>
+                <div class="c-t">อนุญาตให้ซิงก์ข้อมูลสุขภาพ</div>
+                <div class="c-s">เปลี่ยนใจได้ทุกเมื่อในหน้าตั้งค่า และลบข้อมูลย้อนหลังได้ทั้งหมด</div>
+              </div>
+            </div>
+          </div>
+          <div class="ob-foot">
+            <button class="btn" id="toStep2">ถัดไป</button>
+            <button class="skip" id="skipAll">ข้ามไปดูตัวอย่างเลย</button>
+          </div>
+        </div>
+
+        <div id="ob2" style="display:none">
+          <div class="ob-body">
+            <div class="step">ขั้นที่ 2 จาก 2</div>
+            <h1>เล่าเรื่องคุณ<br>ให้เราฟังหน่อย</h1>
+            <p class="k">สิ่งที่นาฬิกาและผลเลือดบอกไม่ได้ เราถามเอง เพื่อให้คำแนะนำตรงกับตัวคุณจริง ๆ</p>
+            <div class="two">
+              <div class="field"><label>อายุ</label><input id="fAge" type="number" value="29" inputmode="numeric"></div>
+              <div class="field"><label>อาชีพ</label><input id="fJob" type="text" value="พนักงานออฟฟิศ" style="font-family:'IBM Plex Sans Thai',sans-serif;font-size:13px"></div>
+            </div>
+            <div class="two">
+              <div class="field"><label>น้ำหนัก (กก.)</label><input id="fW" type="number" value="68" inputmode="numeric"></div>
+              <div class="field"><label>ส่วนสูง (ซม.)</label><input id="fH" type="number" value="172" inputmode="numeric"></div>
+            </div>
+            <div class="field">
+              <label>เป้าหมายสุขภาพ</label>
+              <div class="chips" id="goals">
+                <button class="chip on">ลดไขมัน</button>
+                <button class="chip">นอนดีขึ้น</button>
+                <button class="chip">เพิ่มกล้ามเนื้อ</button>
+                <button class="chip">ลดความเครียด</button>
+              </div>
+            </div>
+            <div class="field">
+              <label>โรคประจำตัว / ประวัติในครอบครัว</label>
+              <div class="chips" id="cond">
+                <button class="chip">ไม่มี</button>
+                <button class="chip on">ไขมันในเลือดสูง</button>
+                <button class="chip">เบาหวาน</button>
+                <button class="chip">ความดัน</button>
+              </div>
+            </div>
+          </div>
+          <div class="ob-foot">
+            <button class="btn" id="finishOb">เริ่มใช้งาน</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ============ APP ============ -->
+      <div class="statusbar">
+        <span id="clock">08:16</span>
+        <span class="dots"><i></i><i></i><i></i> <span id="syncTag" style="margin-left:6px">ซิงก์แล้ว</span></span>
+      </div>
+
+      <div class="viewport" id="viewport">
+
+        <!-- ---- TODAY ---- -->
+        <section class="screen is-active" id="s-today">
+          <p class="eyebrow">วันพุธ · 5 สิงหาคม</p>
+          <h2 class="title">สวัสดีตอนเช้า <span id="greetName">คุณมิ้นท์</span></h2>
+
+          <div class="card score-card">
+            <div class="glow"></div>
+            <div class="pop" id="pop">+2</div>
+            <div class="score-top">
+              <div>
+                <div class="score-num" id="scoreNum">72<small> /100</small></div>
+                <p class="eyebrow" style="margin-top:6px">Steady Score</p>
+              </div>
+              <div class="score-label">
+                <span class="tag" id="scoreTag">พอใช้ กำลังไปได้ดี</span>
+                <p id="scoreDelta">+3 จากสัปดาห์ที่แล้ว</p>
+              </div>
+            </div>
+            <svg class="ecg" id="ecg" viewBox="0 0 340 96" preserveAspectRatio="none" aria-hidden="true">
+              <path class="ghost" d="M0 48 H340"/>
+              <path class="trace" id="trace" d=""/>
+            </svg>
+            <div class="score-foot">
+              <span>นอน<b id="mSleep">6ชม 20น</b></span>
+              <span>ก้าวเดิน<b id="mStep">4,820</b></span>
+              <span>ความเครียด<b id="mStress">ปานกลาง</b></span>
+            </div>
+          </div>
+
+          <div class="card">
+            <h3>วันนี้ต้องทำอะไรบ้าง</h3>
+            <div id="checklist">
+              <div class="check" tabindex="0" data-pt="2"><div class="box"><svg viewBox="0 0 12 12"><path d="M1.5 6.5l3 3 6-7" fill="none" stroke="#05172C" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="txt">กินวิตามิน D3 + โอเมก้า 3<em>หลังมื้อเช้า พร้อมอาหารที่มีไขมัน</em></div><span class="pts">+2</span></div>
+              <div class="check" tabindex="0" data-pt="3"><div class="box"><svg viewBox="0 0 12 12"><path d="M1.5 6.5l3 3 6-7" fill="none" stroke="#05172C" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="txt">ยืดเหยียด 8 นาที ก่อนเข้างาน<em>ท่าสะโพกและหลังส่วนล่าง — คุณนั่งเฉลี่ย 9 ชม./วัน</em></div><span class="pts">+3</span></div>
+              <div class="check" tabindex="0" data-pt="2"><div class="box"><svg viewBox="0 0 12 12"><path d="M1.5 6.5l3 3 6-7" fill="none" stroke="#05172C" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="txt">เดินให้ครบ 7,000 ก้าว<em>ตอนนี้ 4,820 ก้าว ขาดอีก 2,180</em></div><span class="pts">+2</span></div>
+              <div class="check" tabindex="0" data-pt="3"><div class="box"><svg viewBox="0 0 12 12"><path d="M1.5 6.5l3 3 6-7" fill="none" stroke="#05172C" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="txt">เข้านอนก่อน 23:30<em>เป้าหมาย 7 ชม. 30 นาที ตามแผนที่จัดให้</em></div><span class="pts">+3</span></div>
+            </div>
+            <p class="lead" style="margin-top:12px;border-top:1px solid var(--line);padding-top:11px">กดครบทุกข้อ Steady Score จะขยับขึ้น <span style="color:var(--pulse)">10 คะแนน</span></p>
+          </div>
+
+          <div class="card">
+            <h3>สารอาหารที่ควรได้รับวันนี้</h3>
+            <div class="plan">
+              <div class="tile"><div class="n">โปรตีน</div><div class="k">102</div><div class="u">กรัม</div></div>
+              <div class="tile"><div class="n">คาร์บ</div><div class="k">180</div><div class="u">กรัม</div></div>
+              <div class="tile"><div class="n">ไขมัน</div><div class="k">55</div><div class="u">กรัม</div></div>
+            </div>
+            <div class="row"><div class="ic">🍳</div><div><div>มื้อเช้า</div><div class="meta">ไข่ 2 ฟอง + ข้าวกล้อง + อะโวคาโด</div></div><span class="right">520 kcal</span></div>
+            <div class="row"><div class="ic">🥗</div><div><div>มื้อกลางวัน</div><div class="meta">อกไก่ย่าง 150 ก. + สลัดน้ำใส</div></div><span class="right">610 kcal</span></div>
+            <div class="row"><div class="ic">🐟</div><div><div>มื้อเย็น</div><div class="meta">ปลาแซลมอนนึ่ง + ผักรวม (ก่อน 20:00)</div></div><span class="right">580 kcal</span></div>
+          </div>
+
+          <div class="card">
+            <h3>เตือนความจำ</h3>
+            <div class="row"><div class="ic" style="background:rgba(240,101,79,.18)">⏰</div><div><div id="remTitle">ยืดเหยียดยังไม่ได้ทำ</div><div class="meta">ระบบจะเตือนอีกครั้ง 12:30 น.</div></div></div>
+            <div class="row"><div class="ic" style="background:rgba(245,179,66,.18)">💧</div><div><div>ดื่มน้ำแล้ว 900 มล. จาก 2,200 มล.</div><div class="meta">เตือนทุก 90 นาทีระหว่าง 09:00–18:00</div></div></div>
+          </div>
+        </section>
+
+        <!-- ---- LABS ---- -->
+        <section class="screen" id="s-labs">
+          <p class="eyebrow">ผลตรวจสุขภาพ</p>
+          <h2 class="title">แปลผลเลือดให้อ่านง่าย</h2>
+          <p class="sub">สีเขียวคือค่าที่ดี สีแดงคือค่าที่ควรจัดการ ไม่ต้องเดาจากตัวเลขและตัวย่อในใบผลตรวจอีก</p>
+
+          <div class="drop" id="drop" role="button" tabindex="0">
+            <div class="big">📄</div>
+            <b>อัปโหลดภาพหรือไฟล์ผลตรวจ</b>
+            <p>ระบบจะดึงค่าเข้าให้อัตโนมัติ ไม่ต้องกรอกเอง<br>รองรับ JPG, PNG, PDF</p>
+          </div>
+
+          <div id="labsResult" style="display:none">
+            <div class="card">
+              <h3>ผลตรวจ 12 มิ.ย. 2568 <span style="font-size:11px;color:var(--muted);font-weight:400">· ดึงค่าได้ 6 รายการ</span></h3>
+              <div id="labList"></div>
+            </div>
+            <div class="card">
+              <h3>สรุปให้ฟัง</h3>
+              <p class="lead">ค่าที่ต้องจัดการตอนนี้คือไขมัน LDL และวิตามิน D ส่วนน้ำตาลกับตับยังอยู่ในเกณฑ์ดี แผนรายวันของคุณถูกปรับให้เน้นปลาไขมันสูง ใยอาหาร และเดินกลางแดดเช้า 15 นาทีแล้ว</p>
+            </div>
+          </div>
+        </section>
+
+        <!-- ---- TRENDS ---- -->
+        <section class="screen" id="s-trend">
+          <p class="eyebrow">แนวโน้ม</p>
+          <h2 class="title">ถ้ายังใช้ชีวิตแบบเดือนนี้</h2>
+          <div class="chips" style="margin-bottom:14px">
+            <button class="chip on" data-range="m">รายเดือน</button>
+            <button class="chip" data-range="y">รายปี</button>
+          </div>
+
+          <div class="card">
+            <h3>Steady Score ย้อนหลัง + คาดการณ์</h3>
+            <svg class="chart" id="chart" viewBox="0 0 320 170"></svg>
+            <div class="legend">
+              <span><i style="background:#19D3BE"></i>ที่ผ่านมา</span>
+              <span><i style="background:#F0654F"></i>ถ้าไม่เปลี่ยนพฤติกรรม</span>
+            </div>
+            <div class="callout">ถ้าคุณยังมีพฤติกรรมการนอนและการกินแบบเดือนนี้ อีก 6 เดือนข้างหน้า คะแนน Steady Score จะลดลงเหลือ <b>65</b></div>
+          </div>
+
+          <div class="card">
+            <h3>ตัวที่ฉุดคะแนน</h3>
+            <div class="row"><div class="ic" style="background:rgba(240,101,79,.18)">😴</div><div><div>นอนเฉลี่ย 6 ชม. 05 น.</div><div class="meta">ต่ำกว่าเป้าหมาย 1 ชม. 25 น. ติดกัน 18 วัน</div></div><span class="right" style="color:var(--bad)">−7</span></div>
+            <div class="row"><div class="ic" style="background:rgba(245,179,66,.18)">🍜</div><div><div>มื้อเย็นหลัง 21:00 · 14 วัน</div><div class="meta">สัมพันธ์กับหลับลึกที่ลดลง 22%</div></div><span class="right" style="color:var(--warn)">−4</span></div>
+            <div class="row"><div class="ic" style="background:rgba(63,211,154,.18)">🏃</div><div><div>ออกกำลังกาย 3 ครั้ง/สัปดาห์</div><div class="meta">ทำได้ตามแผน 3 เดือนติด</div></div><span class="right" style="color:var(--good)">+6</span></div>
+          </div>
+        </section>
+
+        <!-- ---- MONTHLY ---- -->
+        <section class="screen" id="s-month">
+          <p class="eyebrow">สรุปเดือนกรกฎาคม</p>
+          <h2 class="title">เดือนที่ผ่านมาเป็นยังไง</h2>
+
+          <div class="delta" style="margin-bottom:14px">
+            <div><div class="l">Steady Score</div><div class="v">72</div><div class="d" style="color:var(--good)">▲ 3 จากมิถุนายน</div></div>
+            <div><div class="l">นอนเฉลี่ย</div><div class="v">6:05</div><div class="d" style="color:var(--bad)">▼ 18 นาที</div></div>
+            <div><div class="l">ก้าวเฉลี่ย/วัน</div><div class="v">6,140</div><div class="d" style="color:var(--good)">▲ 780</div></div>
+            <div><div class="l">ทำเช็กลิสต์ครบ</div><div class="v">21/31</div><div class="d" style="color:var(--good)">▲ 5 วัน</div></div>
+          </div>
+
+          <div class="card">
+            <h3>วิเคราะห์ภาพรวม</h3>
+            <p class="lead">การเคลื่อนไหวดีขึ้นชัดเจน คุณเดินมากขึ้นเกือบ 800 ก้าวต่อวันและออกกำลังกายได้ตามแผนทุกสัปดาห์ แต่การนอนสวนทาง — 14 คืนที่กินมื้อเย็นหลังสามทุ่ม ตามด้วยหลับลึกที่ลดลง เดือนหน้าถ้าขยับมื้อเย็นให้เร็วขึ้น 1 ชั่วโมง คะแนนน่าจะขึ้นได้อีกราว 4–6 คะแนนโดยไม่ต้องเปลี่ยนอย่างอื่นเลย</p>
+          </div>
+
+          <div class="card">
+            <h3>สิ่งที่แนะนำสำหรับเดือนสิงหาคม</h3>
+            <div class="row"><div class="ic">🕘</div><div><div>มื้อเย็นก่อน 20:00 ให้ได้ 20 วัน</div><div class="meta">เป้าหมายหลักของเดือนนี้</div></div></div>
+            <div class="row"><div class="ic">🥬</div><div><div>เพิ่มใยอาหารเป็น 30 ก./วัน</div><div class="meta">ช่วยเรื่อง LDL ที่ยังสูงอยู่</div></div></div>
+            <div class="row"><div class="ic">☀️</div><div><div>เดินกลางแดดเช้า 15 นาที</div><div class="meta">วิตามิน D ต่ำกว่าเกณฑ์</div></div></div>
+          </div>
+
+          <div class="card">
+            <h3>วิตามินที่เหมาะกับคุณ</h3>
+            <div class="supp"><div class="pill" style="background:#F5B342">D3</div><div><div class="nm">Vitamin D3 2000 IU</div><div class="rs">ผลเลือดวัดได้ 18 ng/mL ต่ำกว่าเกณฑ์ปกติ</div></div></div>
+            <div class="supp"><div class="pill" style="background:#19D3BE">Ω3</div><div><div class="nm">Omega-3 1000 mg</div><div class="rs">LDL 142 mg/dL และมีประวัติไขมันสูงในครอบครัว</div></div></div>
+            <div class="supp"><div class="pill" style="background:#7C8CF3">Mg</div><div><div class="nm">Magnesium Glycinate 300 mg</div><div class="rs">ช่วยเรื่องคุณภาพการนอนที่ลดลงต่อเนื่อง</div></div></div>
+          </div>
+
+          <div class="card ship">
+            <h3>จัดส่งชุดวิตามินเดือนสิงหาคม</h3>
+            <p class="lead" style="margin-bottom:12px">แบ่งซองรายวัน 30 ซอง ตามคำแนะนำข้างบน ส่งถึงบ้านก่อนวันที่ 1 ของทุกเดือน</p>
+            <div style="display:flex;align-items:baseline;margin-bottom:12px"><span class="price">1,190฿</span><span class="strike">1,400฿</span><span style="margin-left:auto;font-size:11px;color:var(--pulse)">ส่วนลดสมาชิก 15%</span></div>
+            <button class="btn" id="orderBtn">สั่งชุดวิตามินเดือนนี้</button>
+          </div>
+        </section>
+
+        <!-- ---- CHAT ---- -->
+        <section class="screen" id="s-chat">
+          <p class="eyebrow">Chatbot</p>
+          <h2 class="title">ถามอะไรก็ได้เรื่องสุขภาพ</h2>
+          <div class="chips" style="margin-bottom:14px" id="quick">
+            <button class="chip">กินโปรตีนเท่าไหร่ดี</button>
+            <button class="chip">นอนไม่พอทำไงดี</button>
+            <button class="chip">LDL คืออะไร</button>
+            <button class="chip">วิตามิน D กินตอนไหน</button>
+          </div>
+          <div class="chatwrap" id="chatwrap">
+            <div class="msg bot">สวัสดีค่ะ ถามได้เลยว่าอยากรู้เรื่องอะไร เดี๋ยวตอบโดยดูจากผลตรวจและข้อมูลของคุณประกอบให้ด้วย</div>
+          </div>
+          <div class="composer">
+            <input id="chatInput" placeholder="พิมพ์คำถาม…" autocomplete="off">
+            <button id="sendBtn" aria-label="ส่ง">↑</button>
+          </div>
+          <p class="sub" style="margin-top:14px;font-size:11px">คำตอบเป็นข้อมูลสุขภาพทั่วไป ไม่ใช่การวินิจฉัยทางการแพทย์</p>
+        </section>
+
+      </div>
+
+      <div class="toast" id="toast"></div>
+
+      <nav class="tabbar" id="tabbar">
+        <button class="tab on" data-s="s-today"><svg viewBox="0 0 24 24"><path d="M3 12h4l2-6 3 12 2.5-8 1.5 2h5"/></svg>วันนี้</button>
+        <button class="tab" data-s="s-labs"><svg viewBox="0 0 24 24"><path d="M6 3h12M9 3v7l-5 8a2 2 0 0 0 1.7 3h12.6A2 2 0 0 0 20 18l-5-8V3"/></svg>ผลตรวจ</button>
+        <button class="tab" data-s="s-trend"><svg viewBox="0 0 24 24"><path d="M4 19V5M4 19h16M8 15l4-5 3 3 4-6"/></svg>แนวโน้ม</button>
+        <button class="tab" data-s="s-month"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>รายเดือน</button>
+        <button class="tab" data-s="s-chat"><svg viewBox="0 0 24 24"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12z"/></svg>ถาม</button>
+      </nav>
+
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  "use strict";
+  var $ = function(s){ return document.querySelector(s); };
+  var $$ = function(s){ return Array.prototype.slice.call(document.querySelectorAll(s)); };
+
+  /* ---------- clock ---------- */
+  function tick(){
+    var d = new Date();
+    $("#clock").textContent = String(d.getHours()).padStart(2,"0")+":"+String(d.getMinutes()).padStart(2,"0");
+  }
+  tick(); setInterval(tick, 20000);
+
+  /* ---------- toast ---------- */
+  var toastTimer;
+  function toast(msg){
+    var t = $("#toast");
+    t.textContent = msg; t.classList.add("show");
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function(){ t.classList.remove("show"); }, 2200);
+  }
+
+  /* ---------- chip groups ---------- */
+  function chipGroup(sel, multi){
+    var wrap = $(sel); if(!wrap) return;
+    wrap.addEventListener("click", function(e){
+      var b = e.target.closest(".chip"); if(!b) return;
+      if(!multi) wrap.querySelectorAll(".chip").forEach(function(c){ c.classList.remove("on"); });
+      b.classList.toggle("on", multi ? !b.classList.contains("on") : true);
+    });
+  }
+  chipGroup("#goals", false);
+  chipGroup("#cond", false);
+
+  /* ---------- onboarding ---------- */
+  var consented = false;
+  $("#consent").addEventListener("click", function(){
+    consented = !consented;
+    this.classList.toggle("on", consented);
+  });
+  $("#consent").addEventListener("keydown", function(e){
+    if(e.key === "Enter" || e.key === " "){ e.preventDefault(); this.click(); }
+  });
+  $("#toStep2").addEventListener("click", function(){
+    $("#ob1").style.display = "none";
+    $("#ob2").style.display = "block";
+    $("#syncTag").textContent = consented ? "ซิงก์แล้ว" : "ยังไม่ซิงก์";
+  });
+  function startApp(){
+    $("#ob").classList.add("hide");
+    drawEcg(score, true);
+  }
+  $("#skipAll").addEventListener("click", startApp);
+  $("#finishOb").addEventListener("click", function(){
+    var goal = $("#goals .chip.on");
+    if(goal) toast("ตั้งเป้าหมาย: " + goal.textContent + " แล้ว");
+    startApp();
+  });
+
+  /* ---------- Steady Score + ECG signature ---------- */
+  var score = 72, baseScore = 72;
+
+  function ecgPath(sc){
+    // ยิ่งคะแนนสูง จังหวะยิ่งนิ่งและสม่ำเสมอ ยิ่งต่ำยิ่งแกว่ง
+    var W = 340, mid = 48, beats = 4, seg = W / beats;
+    var health = Math.max(0, Math.min(1, (sc - 40) / 55));
+    var amp = 16 + health * 20;
+    var noise = (1 - health) * 9;
+    var d = "M0 " + mid;
+    for(var i = 0; i < beats; i++){
+      var x = i * seg;
+      var j = function(){ return (Math.random() - .5) * noise; };
+      d += " L" + (x + seg*0.14).toFixed(1) + " " + (mid + j()).toFixed(1);
+      d += " L" + (x + seg*0.24).toFixed(1) + " " + (mid - amp*0.28 + j()).toFixed(1);
+      d += " L" + (x + seg*0.32).toFixed(1) + " " + (mid + j()).toFixed(1);
+      d += " L" + (x + seg*0.40).toFixed(1) + " " + (mid + amp*0.35).toFixed(1);
+      d += " L" + (x + seg*0.48).toFixed(1) + " " + (mid - amp).toFixed(1);
+      d += " L" + (x + seg*0.56).toFixed(1) + " " + (mid + amp*0.42).toFixed(1);
+      d += " L" + (x + seg*0.64).toFixed(1) + " " + (mid + j()).toFixed(1);
+      d += " L" + (x + seg*0.78).toFixed(1) + " " + (mid - amp*0.34 + j()).toFixed(1);
+      d += " L" + (x + seg*0.90).toFixed(1) + " " + (mid + j()).toFixed(1);
+      d += " L" + (x + seg).toFixed(1) + " " + mid;
+    }
+    return d;
+  }
+
+  function drawEcg(sc, animate){
+    var p = $("#trace");
+    p.setAttribute("d", ecgPath(sc));
+    var len = p.getTotalLength();
+    p.style.transition = "none";
+    p.style.strokeDasharray = len + " " + len;
+    p.style.strokeDashoffset = animate ? len : 0;
+    if(animate){
+      p.getBoundingClientRect();
+      p.style.transition = "stroke-dashoffset 1.1s cubic-bezier(.4,0,.2,1)";
+      p.style.strokeDashoffset = 0;
+    }
+    var col = sc >= 80 ? "#19D3BE" : sc >= 65 ? "#3FD39A" : sc >= 50 ? "#F5B342" : "#F0654F";
+    p.style.stroke = col;
+  }
+
+  function scoreLabel(sc){
+    if(sc >= 85) return "แข็งแรงมาก";
+    if(sc >= 75) return "ดี รักษาระดับไว้";
+    if(sc >= 60) return "พอใช้ กำลังไปได้ดี";
+    if(sc >= 45) return "ต้องดูแลเพิ่ม";
+    return "ควรปรับพฤติกรรมด่วน";
+  }
+
+  function setScore(sc, delta){
+    score = sc;
+    $("#scoreNum").innerHTML = sc + "<small> /100</small>";
+    $("#scoreTag").textContent = scoreLabel(sc);
+    drawEcg(sc, true);
+    if(delta){
+      var p = $("#pop");
+      p.textContent = (delta > 0 ? "+" : "") + delta;
+      p.classList.remove("go"); void p.offsetWidth; p.classList.add("go");
+    }
+  }
+
+  /* ---------- checklist ---------- */
+  var doneCount = 0;
+  $("#checklist").addEventListener("click", function(e){
+    var row = e.target.closest(".check"); if(!row) return;
+    toggleCheck(row);
+  });
+  $("#checklist").addEventListener("keydown", function(e){
+    if(e.key !== "Enter" && e.key !== " ") return;
+    var row = e.target.closest(".check"); if(!row) return;
+    e.preventDefault(); toggleCheck(row);
+  });
+  function toggleCheck(row){
+    var pt = parseInt(row.dataset.pt, 10);
+    var on = row.classList.toggle("done");
+    doneCount += on ? 1 : -1;
+    setScore(score + (on ? pt : -pt), on ? pt : -pt);
+    if(on){
+      toast("บันทึกแล้ว · Steady Score +" + pt);
+    }
+    var total = $$("#checklist .check").length;
+    $("#remTitle").textContent = doneCount === total
+      ? "ทำครบทุกข้อแล้ววันนี้ 🎉"
+      : (total - doneCount) + " รายการยังไม่ได้ทำ";
+    var stretch = $$("#checklist .check")[1];
+    if(stretch && stretch.classList.contains("done")) $("#mStress").textContent = "ต่ำ";
+  }
+
+  /* ---------- labs ---------- */
+  var LABS = [
+    { n:"LDL คอเลสเตอรอล", v:142, u:"mg/dL", pos:82, st:"สูงกว่าเกณฑ์", cls:"s-bad",  note:"เกณฑ์ที่ดีคือต่ำกว่า 130 · ตัวนี้คือไขมันที่เกาะผนังหลอดเลือด ลดของทอดและเพิ่มใยอาหารช่วยได้" },
+    { n:"HDL คอเลสเตอรอล", v:58, u:"mg/dL", pos:46, st:"ดี", cls:"s-good", note:"ไขมันตัวดี ยิ่งสูงยิ่งช่วยป้องกันหลอดเลือด" },
+    { n:"น้ำตาลสะสม HbA1c", v:5.3, u:"%", pos:38, st:"ดี", cls:"s-good", note:"ค่าเฉลี่ยน้ำตาลในเลือด 3 เดือน อยู่ในเกณฑ์ปกติ" },
+    { n:"วิตามิน D", v:18, u:"ng/mL", pos:12, st:"ต่ำกว่าเกณฑ์", cls:"s-bad", note:"ควรอยู่ 30–50 · มีผลต่อภูมิคุ้มกัน กระดูก และคุณภาพการนอน" },
+    { n:"เอนไซม์ตับ ALT", v:26, u:"U/L", pos:44, st:"ดี", cls:"s-good", note:"ตับทำงานปกติ" },
+    { n:"ไตรกลีเซอไรด์", v:168, u:"mg/dL", pos:72, st:"เริ่มสูง", cls:"s-warn", note:"ควรต่ำกว่า 150 · สัมพันธ์กับน้ำตาลและแอลกอฮอล์" }
+  ];
+  var labsLoaded = false;
+  function loadLabs(){
+    if(labsLoaded) return;
+    var d = $("#drop");
+    d.innerHTML = '<div class="spin"></div><p>กำลังอ่านค่าจากใบผลตรวจ…</p>';
+    setTimeout(function(){
+      labsLoaded = true;
+      d.innerHTML = '<div class="big">✅</div><b>ดึงค่าเข้าระบบแล้ว</b><p>ผลตรวจ 12 มิ.ย. 2568 · แตะเพื่ออัปโหลดใบใหม่</p>';
+      var list = $("#labList");
+      list.innerHTML = LABS.map(function(l){
+        return '<div class="lab">'
+          + '<div class="head"><span>' + l.n + '</span><span class="val">' + l.v + ' <span style="color:var(--muted);font-size:11px">' + l.u + '</span></span></div>'
+          + '<div class="rail"><span class="pin" style="left:50%"></span></div>'
+          + '<div class="note"><span class="status ' + l.cls + '">' + l.st + '</span> — ' + l.note + '</div>'
+          + '</div>';
+      }).join("");
+      $("#labsResult").style.display = "block";
+      requestAnimationFrame(function(){
+        $$("#labList .pin").forEach(function(pin, i){
+          setTimeout(function(){ pin.style.left = LABS[i].pos + "%"; }, 60 * i);
+        });
+      });
+      toast("อ่านค่าได้ 6 รายการ แผนรายวันถูกปรับแล้ว");
+    }, 1400);
+  }
+  $("#drop").addEventListener("click", function(){ if(labsLoaded){ toast("โหมดตัวอย่าง: ใช้ผลตรวจชุดเดิม"); } else { loadLabs(); } });
+  $("#drop").addEventListener("keydown", function(e){ if(e.key === "Enter"){ this.click(); } });
+
+  /* ---------- trend chart ---------- */
+  var DATA = {
+    m: { past:[64,66,63,69,71,72], labels:["ก.พ.","มี.ค.","เม.ย.","พ.ค.","มิ.ย.","ก.ค."], proj:[72,70,69,67,66,65], projLabels:["ส.ค.","ก.ย.","ต.ค.","พ.ย.","ธ.ค.","ม.ค."] },
+    y: { past:[52,58,61,66,72], labels:["2564","2565","2566","2567","2568"], proj:[72,68,65], projLabels:["2569","2570","2571"] }
+  };
+  function drawChart(range){
+    var d = DATA[range], W = 320, H = 170, padL = 26, padR = 8, padT = 14, padB = 22;
+    var all = d.past.concat(d.proj.slice(1));
+    var n = all.length;
+    var min = 45, max = 90;
+    var x = function(i){ return padL + i * (W - padL - padR) / (n - 1); };
+    var y = function(v){ return padT + (max - v) * (H - padT - padB) / (max - min); };
+    var svg = "";
+    [50,60,70,80].forEach(function(g){
+      svg += '<line class="grid" x1="' + padL + '" y1="' + y(g) + '" x2="' + (W-padR) + '" y2="' + y(g) + '"/>';
+      svg += '<text class="lbl" x="2" y="' + (y(g)+3) + '">' + g + '</text>';
+    });
+    var pa = d.past.map(function(v,i){ return x(i) + "," + y(v); }).join(" ");
+    var pb = d.proj.map(function(v,i){ return x(d.past.length - 1 + i) + "," + y(v); }).join(" ");
+    svg += '<polyline class="lineB" points="' + pb + '"/>';
+    svg += '<polyline class="lineA" points="' + pa + '"/>';
+    d.past.forEach(function(v,i){ svg += '<circle class="dot" cx="' + x(i) + '" cy="' + y(v) + '" r="3.2"/>'; });
+    var lastI = n - 1, lastV = d.proj[d.proj.length - 1];
+    svg += '<circle cx="' + x(lastI) + '" cy="' + y(lastV) + '" r="3.6" fill="#F0654F"/>';
+    svg += '<text class="lbl" x="' + (x(lastI) - 6) + '" y="' + (y(lastV) + 16) + '" fill="#F0654F" text-anchor="end">' + lastV + '</text>';
+    d.labels.forEach(function(l,i){ svg += '<text class="lbl" x="' + x(i) + '" y="' + (H-6) + '" text-anchor="middle">' + l + '</text>'; });
+    svg += '<text class="lbl" x="' + x(n-1) + '" y="' + (H-6) + '" text-anchor="middle">' + d.projLabels[d.projLabels.length-1] + '</text>';
+    $("#chart").innerHTML = svg;
+  }
+  drawChart("m");
+  $("#s-trend .chips").addEventListener("click", function(e){
+    var b = e.target.closest(".chip"); if(!b) return;
+    this.querySelectorAll(".chip").forEach(function(c){ c.classList.remove("on"); });
+    b.classList.add("on");
+    drawChart(b.dataset.range);
+  });
+
+  /* ---------- order ---------- */
+  $("#orderBtn").addEventListener("click", function(){
+    this.textContent = "สั่งซื้อแล้ว · ส่งถึงวันที่ 30 ส.ค.";
+    this.style.background = "rgba(63,211,154,.2)";
+    this.style.color = "#3FD39A";
+    toast("บันทึกคำสั่งซื้อชุดวิตามินแล้ว");
+  });
+
+  /* ---------- chatbot ---------- */
+  var KB = [
+    { k:["โปรตีน","protein"], a:"จากน้ำหนัก 68 กก. และเป้าหมายลดไขมัน แนะนำโปรตีนราว 100–110 กรัมต่อวัน หรือประมาณ 30–35 กรัมต่อมื้อ เช่น อกไก่ 150 กรัมให้ประมาณ 33 กรัมค่ะ" },
+    { k:["นอน","หลับ","sleep"], a:"เดือนนี้คุณนอนเฉลี่ย 6 ชม. 05 น. ซึ่งต่ำกว่าเป้าหมาย 7 ชม. 30 น. ตัวที่กระทบชัดที่สุดคือมื้อเย็นหลังสามทุ่ม 14 คืน ลองขยับมื้อเย็นให้เร็วขึ้นหนึ่งชั่วโมงและปิดจอก่อนนอน 30 นาทีดูก่อนค่ะ" },
+    { k:["ldl","ไขมัน","คอเลส"], a:"LDL คือคอเลสเตอรอลชนิดที่ไปเกาะผนังหลอดเลือด ของคุณอยู่ที่ 142 mg/dL ซึ่งควรต่ำกว่า 130 สิ่งที่ช่วยได้คือใยอาหาร 30 กรัมต่อวัน ปลาไขมันสูงสัปดาห์ละ 2–3 มื้อ และลดของทอดค่ะ" },
+    { k:["วิตามิน d","วิตามินดี","d3","แดด"], a:"วิตามิน D เป็นวิตามินละลายในไขมัน กินพร้อมมื้อที่มีไขมันจะดูดซึมดีที่สุด แนะนำมื้อเช้าหลังอาหาร ผลเลือดคุณอยู่ที่ 18 ng/mL จึงจัด D3 2000 IU ไว้ในแผนแล้วค่ะ" },
+    { k:["น้ำ","ดื่ม"], a:"เป้าหมายวันนี้คือ 2,200 มล. ตอนนี้ดื่มแล้ว 900 มล. เหลืออีกประมาณ 5 แก้ว ระบบจะเตือนทุก 90 นาทีจนถึงหกโมงเย็นค่ะ" },
+    { k:["เครียด","stress"], a:"นาฬิกาบันทึกความเครียดระดับปานกลาง 4 วันติด ช่วงที่ขึ้นสูงคือบ่ายสองถึงสี่โมง ลองหายใจเข้า 4 ออก 6 สัก 3 นาทีในช่วงนั้น แล้วดูว่าสัปดาห์หน้า HRV ขยับขึ้นไหมค่ะ" },
+    { k:["ออกกำลัง","วิ่ง","เวท","ยิม"], a:"เดือนที่แล้วคุณทำได้ 3 ครั้งต่อสัปดาห์ตามแผน เดือนนี้แนะนำคงความถี่เดิมแต่เพิ่มเวทขาอีก 1 วัน เพราะช่วยเรื่องน้ำตาลและมวลกล้ามเนื้อไปพร้อมกันค่ะ" }
+  ];
+  function reply(q){
+    var t = q.toLowerCase();
+    for(var i = 0; i < KB.length; i++){
+      for(var j = 0; j < KB[i].k.length; j++){
+        if(t.indexOf(KB[i].k[j]) > -1) return KB[i].a;
+      }
+    }
+    return "ยังตอบเรื่องนี้ได้ไม่ละเอียดพอค่ะ ลองถามเรื่องการนอน โปรตีน ผลเลือด วิตามิน หรือความเครียดดู เดี๋ยวดึงข้อมูลของคุณมาประกอบให้ ถ้าเป็นอาการที่ต้องวินิจฉัย แนะนำให้ปรึกษาแพทย์นะคะ";
+  }
+  function addMsg(text, who){
+    var el = document.createElement("div");
+    el.className = "msg " + who;
+    el.textContent = text;
+    $("#chatwrap").appendChild(el);
+    $("#viewport").scrollTop = $("#viewport").scrollHeight;
+    return el;
+  }
+  function ask(q){
+    if(!q.trim()) return;
+    addMsg(q, "me");
+    var t = addMsg("", "bot");
+    t.innerHTML = '<span class="typing"><i></i><i></i><i></i></span>';
+    setTimeout(function(){
+      t.textContent = reply(q);
+      $("#viewport").scrollTop = $("#viewport").scrollHeight;
+    }, 700);
+  }
+  $("#sendBtn").addEventListener("click", function(){ ask($("#chatInput").value); $("#chatInput").value = ""; });
+  $("#chatInput").addEventListener("keydown", function(e){
+    if(e.key === "Enter"){ ask(this.value); this.value = ""; }
+  });
+  $("#quick").addEventListener("click", function(e){
+    var b = e.target.closest(".chip"); if(!b) return;
+    ask(b.textContent);
+  });
+
+  /* ---------- tabs ---------- */
+  $("#tabbar").addEventListener("click", function(e){
+    var b = e.target.closest(".tab"); if(!b) return;
+    this.querySelectorAll(".tab").forEach(function(t){ t.classList.remove("on"); });
+    b.classList.add("on");
+    $$(".screen").forEach(function(s){ s.classList.remove("is-active"); });
+    $("#" + b.dataset.s).classList.add("is-active");
+    $("#viewport").scrollTop = 0;
+    if(b.dataset.s === "s-today") drawEcg(score, true);
+  });
+
+  drawEcg(score, false);
+})();
+</script>
+</body>
+</html>
