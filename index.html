@@ -514,6 +514,16 @@ h2.title{font-family:"Anuphan",sans-serif;font-size:23px;font-weight:600;margin:
           </div>
 
           <div class="card">
+            <h3>ท่ายืดเหยียดของวันนี้</h3>
+            <p class="lead" style="margin-bottom:12px">จัดตามกิจกรรมที่นาฬิกาบันทึกไว้ — วันนี้คือเวทกล้ามเนื้อขา</p>
+            <div class="chips" id="stretchTabs" style="margin-bottom:4px">
+              <button class="chip on" data-st="pre">ก่อนกิจกรรม · 6 นาที</button>
+              <button class="chip" data-st="post">หลังกิจกรรม · 7 นาที</button>
+            </div>
+            <div id="stretchList"></div>
+          </div>
+
+          <div class="card">
             <h3>สารอาหารที่ควรได้รับวันนี้</h3>
             <div class="plan">
               <div class="tile"><div class="n">โปรตีน</div><div class="k">112</div><div class="u">กรัม</div></div>
@@ -911,6 +921,35 @@ h2.title{font-family:"Anuphan",sans-serif;font-size:23px;font-weight:600;margin:
     e.preventDefault(); toggleCheck(row);
   });
 
+  /* ท่ายืดเหยียดก่อน–หลังกิจกรรม */
+  var STRETCH = {
+    pre: [
+      { i:"🦵", n:"แกว่งขาหน้า–หลัง", m:"ปลุกข้อสะโพกก่อนลงน้ำหนัก", t:"10 ครั้ง/ข้าง" },
+      { i:"🧎", n:"สควอทเปล่าแบบช้า", m:"เปิดพิสัยเข่าและข้อเท้า", t:"12 ครั้ง" },
+      { i:"🦶", n:"โยกข้อเท้าเข้าหากำแพง", m:"ให้เข่าเดินตรงตอนย่อ", t:"10 ครั้ง/ข้าง" },
+      { i:"🍑", n:"กลูตบริดจ์", m:"สั่งงานสะโพกก่อนยกจริง", t:"12 ครั้ง" }
+    ],
+    post: [
+      { i:"🦵", n:"ยืดต้นขาหน้า ยืนดึงส้นเท้า", m:"ค้างไว้ หายใจยาว ไม่เด้ง", t:"40 วิ/ข้าง" },
+      { i:"🪑", n:"ยืดแฮมสตริง นั่งเหยียดขา", m:"หลังตรง ก้มจากสะโพก", t:"40 วิ/ข้าง" },
+      { i:"🕊️", n:"ท่านกพิราบ ยืดสะโพก", m:"คลายสะโพกจากการนั่งทั้งวัน", t:"45 วิ/ข้าง" },
+      { i:"🧱", n:"ยืดน่องดันกำแพง", m:"ส้นเท้าติดพื้น เข่าตึง", t:"30 วิ/ข้าง" }
+    ]
+  };
+  function drawStretch(k){
+    $("#stretchList").innerHTML = STRETCH[k].map(function(s){
+      return '<div class="row"><div class="ic">' + s.i + '</div><div><div>' + s.n
+        + '</div><div class="meta">' + s.m + '</div></div><span class="right">' + s.t + '</span></div>';
+    }).join("");
+  }
+  drawStretch("pre");
+  $("#stretchTabs").addEventListener("click", function(e){
+    var b = e.target.closest(".chip"); if(!b) return;
+    this.querySelectorAll(".chip").forEach(function(c){ c.classList.remove("on"); });
+    b.classList.add("on");
+    drawStretch(b.dataset.st);
+  });
+
   /* labs */
   var LABS = [
     { n:"LDL คอเลสเตอรอล", v:108, u:"mg/dL", pos:44, st:"ปกติ", cls:"s-good", note:"เกณฑ์ที่ดีคือต่ำกว่า 130 · ตัวนี้คือไขมันที่เกาะผนังหลอดเลือด ของคุณอยู่ในระดับที่ดี" },
@@ -1066,6 +1105,8 @@ h2.title{font-family:"Anuphan",sans-serif;font-size:23px;font-weight:600;margin:
     $$(".screen").forEach(function(s,i){ s.classList.toggle("is-active", i === 0); });
     $$("#tabbar .tab").forEach(function(t,i){ t.classList.toggle("on", i === 0); });
     drawChart("m");
+    $$("#stretchTabs .chip").forEach(function(c,i){ c.classList.toggle("on", i === 0); });
+    drawStretch("pre");
     $("#ob1").style.display = "block";
     $("#ob2").style.display = "none";
     $("#viewport").scrollTop = 0;
