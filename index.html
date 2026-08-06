@@ -475,9 +475,9 @@ h2.title{font-family:"Anuphan",sans-serif;font-size:23px;font-weight:600;margin:
 
         <!-- TODAY -->
         <section class="screen is-active" id="s-today">
-          <p class="eyebrow">วันพุธ · 5 สิงหาคม</p>
+          <p class="eyebrow" id="todayDate">วันพุธ · 5 สิงหาคม</p>
           <div class="greet">
-            <h2 class="title">สวัสดีตอนเช้า <span id="greetName">คุณจงสวัสดิ์</span></h2>
+            <h2 class="title"><span id="greetTime">สวัสดีตอนเช้า</span> <span id="greetName">คุณจงสวัสดิ์</span></h2>
             <button class="avatar" id="avatarBtn" aria-label="บัญชีของฉัน">จ</button>
           </div>
 
@@ -559,7 +559,7 @@ h2.title{font-family:"Anuphan",sans-serif;font-size:23px;font-weight:600;margin:
 
           <div id="labsResult" style="display:none">
             <div class="card">
-              <h3>ผลตรวจ 12 มิ.ย. 2568 <span style="font-size:11px;color:var(--muted);font-weight:400">· ดึงค่าได้ 6 รายการ</span></h3>
+              <h3><span id="labDate1">ผลตรวจ 12 มิ.ย. 2568</span> <span style="font-size:11px;color:var(--muted);font-weight:400">· ดึงค่าได้ 6 รายการ</span></h3>
               <div id="labList"></div>
             </div>
             <div class="card">
@@ -598,14 +598,14 @@ h2.title{font-family:"Anuphan",sans-serif;font-size:23px;font-weight:600;margin:
 
         <!-- MONTHLY -->
         <section class="screen" id="s-month">
-          <p class="eyebrow">สรุปเดือนกรกฎาคม</p>
+          <p class="eyebrow" id="monthTitle">สรุปเดือนกรกฎาคม</p>
           <h2 class="title">เดือนที่ผ่านมาเป็นยังไง</h2>
 
           <div class="delta" style="margin-bottom:14px">
-            <div><div class="l">Steady Score</div><div class="v">72</div><div class="d" style="color:var(--good)">▲ 3 จากมิถุนายน</div></div>
+            <div><div class="l">Steady Score</div><div class="v">72</div><div class="d" style="color:var(--good)">▲ 3 จาก<span id="prevMonth">มิถุนายน</span></div></div>
             <div><div class="l">นอนเฉลี่ย</div><div class="v">6:05</div><div class="d" style="color:var(--bad)">▼ 18 นาที</div></div>
-            <div><div class="l">มวลกล้ามเนื้อ</div><div class="v">+0.8</div><div class="d" style="color:var(--good)">▲ กก. จากมิถุนายน</div></div>
-            <div><div class="l">ทำเช็กลิสต์ครบ</div><div class="v">21/31</div><div class="d" style="color:var(--good)">▲ 5 วัน</div></div>
+            <div><div class="l">มวลกล้ามเนื้อ</div><div class="v">+0.8</div><div class="d" style="color:var(--good)">▲ กก. จาก<span id="prevMonth2">มิถุนายน</span></div></div>
+            <div><div class="l">ทำเช็กลิสต์ครบ</div><div class="v" id="checkDays">21/31</div><div class="d" style="color:var(--good)">▲ 5 วัน</div></div>
           </div>
 
           <div class="card">
@@ -614,7 +614,7 @@ h2.title{font-family:"Anuphan",sans-serif;font-size:23px;font-weight:600;margin:
           </div>
 
           <div class="card">
-            <h3>สิ่งที่แนะนำสำหรับเดือนสิงหาคม</h3>
+            <h3>สิ่งที่แนะนำสำหรับเดือน<span id="thisMonth">สิงหาคม</span></h3>
             <div class="row"><div class="ic">🕘</div><div><div>มื้อเย็นก่อน 20:00 ให้ได้ 20 วัน</div><div class="meta">เป้าหมายหลักของเดือนนี้</div></div></div>
             <div class="row"><div class="ic">🥩</div><div><div>โปรตีน 112 ก./วัน ให้ครบ</div><div class="meta">1.6 ก. ต่อน้ำหนักตัว 1 กก. สำหรับการสร้างกล้ามเนื้อ</div></div></div>
             <div class="row"><div class="ic">☀️</div><div><div>เดินกลางแดดเช้า 15 นาที</div><div class="meta">รักษาระดับวิตามิน D และช่วยตั้งนาฬิกาการนอน</div></div></div>
@@ -628,7 +628,7 @@ h2.title{font-family:"Anuphan",sans-serif;font-size:23px;font-weight:600;margin:
           </div>
 
           <div class="card ship">
-            <h3>จัดส่งชุดวิตามินเดือนสิงหาคม</h3>
+            <h3>จัดส่งชุดวิตามินเดือน<span id="thisMonth2">สิงหาคม</span></h3>
             <p class="lead" style="margin-bottom:12px">แบ่งซองรายวัน 30 ซอง ตามคำแนะนำข้างบน ส่งถึงบ้านก่อนวันที่ 1 ของทุกเดือน</p>
             <div style="display:flex;align-items:baseline;margin-bottom:12px"><span class="price">1,190฿</span><span class="strike">1,400฿</span><span style="margin-left:auto;font-size:11px;color:var(--pulse)">ส่วนลดสมาชิก 15%</span></div>
             <button class="btn" id="orderBtn">สั่งชุดวิตามินเดือนนี้</button>
@@ -701,6 +701,41 @@ h2.title{font-family:"Anuphan",sans-serif;font-size:23px;font-weight:600;margin:
     $("#clock").textContent = String(d.getHours()).padStart(2,"0")+":"+String(d.getMinutes()).padStart(2,"0");
   }
   tick(); setInterval(tick, 20000);
+
+  /* ---------- วันที่จริง (ไทย) ---------- */
+  var TH_M  = ["มกราคม","กุมภาพันธ์","มีนาคม","เมษายน","พฤษภาคม","มิถุนายน","กรกฎาคม","สิงหาคม","กันยายน","ตุลาคม","พฤศจิกายน","ธันวาคม"];
+  var TH_MS = ["ม.ค.","ก.พ.","มี.ค.","เม.ย.","พ.ค.","มิ.ย.","ก.ค.","ส.ค.","ก.ย.","ต.ค.","พ.ย.","ธ.ค."];
+  var TH_D  = ["วันอาทิตย์","วันจันทร์","วันอังคาร","วันพุธ","วันพฤหัสบดี","วันศุกร์","วันเสาร์"];
+  var NOW = new Date();
+  function shiftMonth(n){ return new Date(NOW.getFullYear(), NOW.getMonth() + n, 1); }
+  function be(d){ return d.getFullYear() + 543; }
+  function greeting(h){
+    if(h >= 5 && h < 12) return "สวัสดีตอนเช้า";
+    if(h >= 12 && h < 16) return "สวัสดีตอนบ่าย";
+    if(h >= 16 && h < 19) return "สวัสดีตอนเย็น";
+    return "สวัสดีตอนค่ำ";
+  }
+  var LAB_DATE = (function(){
+    var d = new Date(NOW.getFullYear(), NOW.getMonth() - 2, 12);
+    return "ผลตรวจ " + d.getDate() + " " + TH_MS[d.getMonth()] + " " + be(d);
+  })();
+
+  function applyDates(){
+    var d = new Date();
+    $("#todayDate").textContent = TH_D[d.getDay()] + " · " + d.getDate() + " " + TH_M[d.getMonth()];
+    $("#greetTime").textContent = greeting(d.getHours());
+    var prev = shiftMonth(-1), prev2 = shiftMonth(-2);
+    $("#monthTitle").textContent = "สรุปเดือน" + TH_M[prev.getMonth()];
+    $("#prevMonth").textContent = TH_M[prev2.getMonth()];
+    $("#prevMonth2").textContent = TH_M[prev2.getMonth()];
+    $("#thisMonth").textContent = TH_M[NOW.getMonth()];
+    $("#thisMonth2").textContent = TH_M[NOW.getMonth()];
+    var daysPrev = new Date(prev.getFullYear(), prev.getMonth() + 1, 0).getDate();
+    $("#checkDays").textContent = Math.round(daysPrev * 0.68) + "/" + daysPrev;
+    $("#labDate1").textContent = LAB_DATE;
+  }
+  applyDates();
+  setInterval(applyDates, 60000);
 
   /* toast */
   var toastTimer;
@@ -970,7 +1005,7 @@ h2.title{font-family:"Anuphan",sans-serif;font-size:23px;font-weight:600;margin:
     d.innerHTML = '<div class="spin"></div><p>กำลังอ่านค่าจากใบผลตรวจ…</p>';
     setTimeout(function(){
       labsLoaded = true;
-      d.innerHTML = '<div class="big">✅</div><b>ดึงค่าเข้าระบบแล้ว</b><p>ผลตรวจ 12 มิ.ย. 2568 · แตะเพื่ออัปโหลดใบใหม่</p>';
+      d.innerHTML = '<div class="big">✅</div><b>ดึงค่าเข้าระบบแล้ว</b><p>' + LAB_DATE + ' · แตะเพื่ออัปโหลดใบใหม่</p>';
       $("#labList").innerHTML = LABS.map(function(l){
         return '<div class="lab">'
           + '<div class="head"><span>' + l.n + '</span><span class="val">' + l.v + ' <span style="color:var(--muted);font-size:11px">' + l.u + '</span></span></div>'
@@ -992,9 +1027,15 @@ h2.title{font-family:"Anuphan",sans-serif;font-size:23px;font-weight:600;margin:
 
   /* chart */
   var DATA = {
-    m: { past:[64,66,63,69,71,72], labels:["ก.พ.","มี.ค.","เม.ย.","พ.ค.","มิ.ย.","ก.ค."], proj:[72,70,69,67,66,65], projLabels:["ส.ค.","ก.ย.","ต.ค.","พ.ย.","ธ.ค.","ม.ค."] },
-    y: { past:[52,58,61,66,72], labels:["2564","2565","2566","2567","2568"], proj:[72,65,55], projLabels:["2569","2570","2571"] }
+    m: { past:[64,66,63,69,71,72], labels:[], proj:[72,70,69,67,66,65], projLabels:[] },
+    y: { past:[52,58,61,66,72], labels:[], proj:[72,68,62,55], projLabels:[] }
   };
+  (function(){
+    for(var i = 6; i >= 1; i--) DATA.m.labels.push(TH_MS[shiftMonth(-i).getMonth()]);
+    for(var j = 0; j < 6; j++) DATA.m.projLabels.push(TH_MS[shiftMonth(j).getMonth()]);
+    for(var y = 4; y >= 0; y--) DATA.y.labels.push(String(be(NOW) - y));
+    for(var z = 1; z <= 3; z++) DATA.y.projLabels.push(String(be(NOW) + z));
+  })();
   function drawChart(range){
     var d = DATA[range], W = 320, H = 170, padL = 30, padR = 24, padT = 14, padB = 22;
     var n = d.past.concat(d.proj.slice(1)).length;
@@ -1032,7 +1073,8 @@ h2.title{font-family:"Anuphan",sans-serif;font-size:23px;font-weight:600;margin:
   /* order */
   var ORDER_HTML = $("#orderBtn").textContent;
   $("#orderBtn").addEventListener("click", function(){
-    this.textContent = "สั่งซื้อแล้ว · ส่งถึงวันที่ 30 ส.ค.";
+    var last = new Date(NOW.getFullYear(), NOW.getMonth() + 1, 0);
+    this.textContent = "สั่งซื้อแล้ว · ส่งถึงวันที่ " + last.getDate() + " " + TH_MS[last.getMonth()];
     this.style.background = "rgba(63,211,154,.2)";
     this.style.color = "#3FD39A";
     toast("บันทึกคำสั่งซื้อชุดวิตามินแล้ว");
